@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block title %}Artículos - SportsCoLab Admin{% endblock %}
+{% block page_title %}Gestión de Artículos{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4>Artículos del Blog</h4>
+        <p class="text-muted">Gestiona el contenido del blog y los columnistas</p>
+    </div>
+    <a href="{{ url_for('new_post') }}" class="btn btn-primary">
+        <i class="fas fa-plus me-2"></i>
+        Nuevo Artículo
+    </a>
+</div>
+
+<!-- Filtros -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-3">
+            <div class="col-md-4">
+                <label for="status" class="form-label">Estado</label>
+                <select class="form-select" id="status" name="status">
+                    <option value="">Todos los estados</option>
+                    <option value="draft" {{ 'selected' if status_filter == 'draft' }}>Borrador</option>
+                    <option value="published" {{ 'selected' if status_filter == 'published' }}>Publicado</option>
+                    <option value="archived" {{ 'selected' if status_filter == 'archived' }}>Archivado</option>
+                </select>
+            </div>
+            {% if session.role == 'admin' %}
+            <div class="col-md-4">
+                <label for="author" class="form-label">Autor</label>
+                <select class="form-select" id="author" name="author">
+                    <option value="">Todos los autores</option>
+                    {% for author in authors %}
+                    <option value="{{ author.id }}" {{ 'selected' if author_filter == author.id|string }}>
+                        {{ author.full_name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endif %}
+            <div class="col-md-4 d-flex align-items-end">
+                <button type="submit" class="btn btn-outline-primary me-2">Filtrar</button>
+                <a href="{{ url_for('posts') }}" class="btn btn-outline-secondary">Limpiar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Lista de artículos -->
+<div class="card">
+    <div class="card-body">
+        {% if posts %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Título</th>
+                        <th>Autor</th>
+                        <th>Categoría</th>
+                        <th>Estado</th>
+                        <th>Fecha</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for post in posts %}
+                    <tr>
+                        <td>
+                            <strong>{{ post.title }}</strong>
+                            {% if post.excerpt %}
+                            <br><small class="text-muted">{{ post.excerpt[:100] }}...</small>
+                            {% endif %}
+                        </td>
+                        <td>{{ post.author_name or 'Anónimo' }}</td>
+                        <td>
+                            {% if post.category %}
+                            <span class="badge bg-secondary">{{ post.category }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge bg-{{ 'success' if post.status == 'published' else 'warning' if post.status == 'draft' else 'secondary' }}">
+                                {{ post.status.title() }}
+                            </span>
+                        </td>
+                        <td>
+                            <small>
+                                {{ post.created_at[:10] }}<br>
+                                {% if post.published_at %}
+                                Publicado: {{ post.published_at[:10] }}
+                                {% endif %}
+                            </small>
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <a href="{{ url_for('edit_post', post_id=post.id) }}" class="btn btn-outline-primary">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                {% if session.role == 'admin' %}
+                                <button class="btn btn-outline-danger" onclick="deletePost({{ post.id }})">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-edit fa-3x text-muted mb-3"></i>
+            <h5>No hay artículos</h5>
+            <p class="text-muted">Comienza creando tu primer artículo</p>
+            <a href="{{ url_for('new_post') }}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>
+                Crear Artículo
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function deletePost(postId) {
+    if (confirm('¿Estás seguro de que quieres eliminar este artículo?')) {
+        // Aquí iría la lógica para eliminar el post
+        alert('Funcionalidad de eliminación pendiente de implementar');
+    }
+}
+</script>
+{% endblock %}
+

@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - SportsCoLab Admin{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Estadísticas principales -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                            Artículos Publicados
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.published_posts }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-edit fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-success shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                            Usuarios Activos
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.total_users }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-users fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-info shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                            Productos
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.total_products }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-shopping-cart fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-warning shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                            Testimonios
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.total_testimonials }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-quote-left fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Gráfico de visitas -->
+    <div class="col-xl-8 col-lg-7">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-primary">Visitas de la Última Semana</h6>
+            </div>
+            <div class="card-body">
+                <div class="chart-area">
+                    <canvas id="visitsChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Artículos recientes -->
+    <div class="col-xl-4 col-lg-5">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-primary">Artículos Recientes</h6>
+                <a href="{{ url_for('posts') }}" class="btn btn-sm btn-primary">Ver todos</a>
+            </div>
+            <div class="card-body">
+                {% for post in recent_posts %}
+                <div class="d-flex align-items-center mb-3">
+                    <div class="flex-grow-1">
+                        <h6 class="mb-1">{{ post.title[:50] }}{% if post.title|length > 50 %}...{% endif %}</h6>
+                        <small class="text-muted">
+                            Por {{ post.author_name or 'Anónimo' }} - 
+                            <span class="badge badge-{{ 'success' if post.status == 'published' else 'warning' }}">
+                                {{ post.status }}
+                            </span>
+                        </small>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Acciones rápidas -->
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Acciones Rápidas</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <a href="{{ url_for('new_post') }}" class="btn btn-primary btn-block">
+                            <i class="fas fa-plus me-2"></i>
+                            Nuevo Artículo
+                        </a>
+                    </div>
+                    {% if session.role == 'admin' %}
+                    <div class="col-md-3 mb-3">
+                        <a href="{{ url_for('users') }}" class="btn btn-success btn-block">
+                            <i class="fas fa-user-plus me-2"></i>
+                            Gestionar Usuarios
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="{{ url_for('analytics') }}" class="btn btn-info btn-block">
+                            <i class="fas fa-chart-bar me-2"></i>
+                            Ver Analíticas
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="{{ url_for('testimonials') }}" class="btn btn-warning btn-block">
+                            <i class="fas fa-quote-left me-2"></i>
+                            Testimonios
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Gráfico de visitas
+const ctx = document.getElementById('visitsChart').getContext('2d');
+const visitsChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: [
+            {% for visit in weekly_analytics %}
+            '{{ visit.date }}',
+            {% endfor %}
+        ],
+        datasets: [{
+            label: 'Visitas',
+            data: [
+                {% for visit in weekly_analytics %}
+                {{ visit.visits }},
+                {% endfor %}
+            ],
+            borderColor: 'rgb(75, 192, 192)',
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            tension: 0.1
+        }]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+</script>
+{% endblock %}
+
